@@ -9,10 +9,10 @@ from spotify_graph import SpotifyGraph
 def download_clips(ds):
     '''Download .mp3 song previews to [dataset_dir]/clips'''
 
-    if not os.path.isdir(ds.clips_dir):
-            os.mkdir(ds.clips_dir)
+    if not os.path.isdir(ds.clip_dir):
+            os.mkdir(ds.clip_dir)
 
-    fnames = os.listdir(ds.clips_dir)
+    fnames = os.listdir(ds.clip_dir)
     n = len(ds.tracks)
     in_folder = set()
     for fname in fnames:
@@ -26,7 +26,7 @@ def download_clips(ds):
 
     for i,track_id in enumerate(to_download):
         try:
-            urllib.request.urlretrieve(ds.tracks[track_id]["preview_url"], path.join(ds.clips_dir, track_id + ".mp3"))
+            urllib.request.urlretrieve(ds.tracks[track_id]["preview_url"], path.join(ds.clip_dir, track_id + ".mp3"))
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 sys.exit()
@@ -39,10 +39,10 @@ def download_clips(ds):
 def download_images(ds, size="small"):
     '''Download album covers to [dataset_dir]/images'''
 
-    if not os.path.isdir(ds.images_dir):
-            os.mkdir(ds.images_dir)
+    if not os.path.isdir(ds.img_dir):
+            os.mkdir(ds.img_dir)
 
-    fnames = os.listdir(ds.images_dir)
+    fnames = os.listdir(ds.img_dir)
     in_folder = set()
     for fname in fnames:
         in_folder.add(fname.rsplit('.')[0])
@@ -61,7 +61,7 @@ def download_images(ds, size="small"):
 
     for i,image_id in enumerate(urls):
         try:
-            urllib.request.urlretrieve(urls[image_id], path.join(ds.images_dir, image_id + ".jpg"))
+            urllib.request.urlretrieve(urls[image_id], path.join(ds.img_dir, image_id + ".jpg"))
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 sys.exit()
@@ -102,12 +102,12 @@ def remove_albums(ds, save_dir=None):
         if node in albums:
             g.remove_node(node)
     
-    dc = filter_dataset_with_graph(g)
+    ds = filter_dataset_with_graph(ds, g)
 
     if save_dir is None:
-        dc.save()
+        ds.save()
     else:
-        dc.save_as(save_dir)
+        ds.save_as(save_dir)
 
 
 

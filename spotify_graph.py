@@ -5,7 +5,7 @@ import json
 
 import pandas as pd
 import numpy as np
-#import dgl
+import dgl
 import networkx as nx
 import torch
 
@@ -24,11 +24,11 @@ class SpotifyGraph():
         self.ft_dir = features_dir
         self.features_dict = {}
 
-        print("Loading graph...")
         self.load()
 
 
     def load(self):
+        print("Loading graph...")
         with open(self.tracks_pth, "r", encoding="utf-8") as f:
             self.tracks = json.load(f)
         with open(self.col_pth, "r", encoding="utf-8") as f:
@@ -43,6 +43,10 @@ class SpotifyGraph():
     def save_as(self, dir):
         '''Save dataset to provided directory.'''
 
+        print("Saving graph...")
+        if not os.path.isdir(dir):
+            os.mkdir(dir)
+
         with open(path.join(dir, "tracks.json"), "w", encoding="utf-8") as f:
             json.dump(self.tracks, f, ensure_ascii=False, indent=2)  
         with open(path.join(dir, "collections.json"), "w", encoding="utf-8") as f:
@@ -56,32 +60,32 @@ class SpotifyGraph():
 
         tracks = pd.from_dict()
 
-    # def to_dgl_graph(self):
-    #     '''Get dataset as a DGL simple graph.
-    #         Nodes with ids [0, len(track_ids)) correspond to tracks.
-    #         Nodes with ids [len(track_ids), len(track_ids)+len(col_ids)) correspond to collections.'''
+    def to_dgl_graph(self):
+        '''Get dataset as a DGL simple graph.
+            Nodes with ids [0, len(track_ids)) correspond to tracks.
+            Nodes with ids [len(track_ids), len(track_ids)+len(col_ids)) correspond to collections.'''
 
-    #     track_ids = list(self.tracks)
-    #     col_ids = list(self.collections)
-    #     all_ids = track_ids.copy()
-    #     all_ids.extend(col_ids)
+        track_ids = list(self.tracks)
+        col_ids = list(self.collections)
+        all_ids = track_ids.copy()
+        all_ids.extend(col_ids)
 
-    #     g = dgl.DGLGraph()
-    #     n_nodes = len(track_ids) + len(col_ids)
-    #     g.add_nodes(n_nodes)
+        g = dgl.DGLGraph()
+        n_nodes = len(track_ids) + len(col_ids)
+        g.add_nodes(n_nodes)
 
-    #     # vectors of "to" and "from" nodes for all edges
-    #     # bidirectional duplicates are included in self.graph["edges"]
-    #     index_map = {nid: i for i, nid in enumerate(all_ids)}
+        # vectors of "to" and "from" nodes for all edges
+        # bidirectional duplicates are included in self.graph["edges"]
+        index_map = {nid: i for i, nid in enumerate(all_ids)}
 
-    #     from_nodes = [ index_map[e["from"]] for e in self.graph["edges"] ]
-    #     to_nodes = [ index_map[e["to"]] for e in self.graph["edges"]]
+        from_nodes = [ index_map[e["from"]] for e in self.graph["edges"] ]
+        to_nodes = [ index_map[e["to"]] for e in self.graph["edges"]]
 
-    #     g.add_edges(from_nodes, to_nodes)
-    #     # BUG: why is this a DGLHeterorgraph??
+        g.add_edges(from_nodes, to_nodes)
+        # BUG: why is this a DGLHeterorgraph??
 
-    #     #self.g, self.track_ids, self.col_ids, self.features = g, track_ids, col_ids, features
-    #     return g, track_ids, col_ids
+        #self.g, self.track_ids, self.col_ids, self.features = g, track_ids, col_ids, features
+        return g, track_ids, col_ids
 
 
     def to_nx_graph(self):
